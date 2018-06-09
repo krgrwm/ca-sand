@@ -1,0 +1,63 @@
+import * as PIXI from 'pixi.js';
+import * as MNN from './margolus'
+
+let syssize = [10, 10]
+let dx = innerWidth / syssize[1]
+let dy = innerHeight / syssize[0]
+
+let delta = Math.min(dx, dy)
+
+let app = new PIXI.Application({width: (syssize[1]-1)*delta, height: (syssize[0]-1)*delta});
+
+function set_sprite(sprite_mat : PIXI.Sprite[][], mat : number[][]) {
+    for (let i=0; i<mat.length; i++) {
+        for (let j=0; j<mat[i].length; j++) {
+            let v = mat[i][j]
+            if (v == 0) {
+                sprite_mat[i][j].tint = 0x0000FF
+            } else {
+                sprite_mat[i][j].tint = 0xFF0000
+            }
+        }
+    }
+}
+
+function setup() 
+{
+    let gameScene = new PIXI.Container()
+    app.stage.addChild(gameScene)
+
+
+    let sprite_mat = new Array(syssize[0])
+    for (let i=0; i<syssize[0]; i++)
+    {
+        sprite_mat[i] = new Array(syssize[1])
+        for (let j=0; j<syssize[1]; j++)
+        {
+            sprite_mat[i][j] = new PIXI.Sprite(PIXI.Texture.WHITE)
+            sprite_mat[i][j].width =delta 
+            sprite_mat[i][j].height = delta
+            sprite_mat[i][j].position.set(j*delta, i*delta)
+            gameScene.addChild(sprite_mat[i][j])
+        }
+    }
+
+    gameScene.interactive = true
+
+    let mmat = new MNN.MargolusGrid(syssize[0], syssize[1])
+
+    mmat.set(3, 4, 1)
+
+    function update(delta : number) {
+        set_sprite(sprite_mat, mmat.mat)
+    }
+
+    app.ticker.add(update)
+}
+
+setup()
+
+
+
+//Add the canvas that Pixi automatically created for you to the HTML document
+document.body.appendChild(app.view);
